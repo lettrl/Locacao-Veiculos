@@ -1,8 +1,7 @@
 @base = http://localhost:3000
 @token = {{login.response.body.token}}
 
-### 1. Cadastrar usuário
-# @name cadastro
+### Cadastrar usuário
 POST {{base}}/auth/registrar
 Content-Type: application/json
 
@@ -12,7 +11,7 @@ Content-Type: application/json
   "senha": "senha123"
 }
 
-### 2. Login
+### Login
 # @name login
 POST {{base}}/auth/login
 Content-Type: application/json
@@ -22,11 +21,11 @@ Content-Type: application/json
   "senha": "senha123"
 }
 
-### 3. Listar veículos disponíveis
+### Listar veículos disponíveis
 GET {{base}}/veiculos?disponiveis=true
 Authorization: Bearer {{token}}
 
-### 4. Registrar locação (veiculoId = 1)
+### Registrar locação
 # @name locacao
 POST {{base}}/locacoes
 Content-Type: application/json
@@ -38,7 +37,7 @@ Authorization: Bearer {{token}}
   "dataPrevistaDevolucao": "2026-11-20"
 }
 
-### 5. Tentar alugar o mesmo veículo de novo (espera 409)
+### Tentar alugar o mesmo veículo de novo — espera 409
 POST {{base}}/locacoes
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -49,10 +48,10 @@ Authorization: Bearer {{token}}
   "dataPrevistaDevolucao": "2026-11-20"
 }
 
-### 6. Finalizar locação (id = {{locacao.response.body.id}})
+### Finalizar locação
 PATCH {{base}}/locacoes/{{locacao.response.body.id}}/finalizar
 Authorization: Bearer {{token}}
 
-### 7. Tentar finalizar de novo (espera 409)
+### Tentar finalizar de novo — espera 409
 PATCH {{base}}/locacoes/{{locacao.response.body.id}}/finalizar
 Authorization: Bearer {{token}}
