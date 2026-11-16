@@ -6,8 +6,8 @@ POST {{base}}/auth/registrar
 Content-Type: application/json
 
 {
-  "nome": "Usuário Demo",
-  "email": "demo@locacao.com",
+  "nome": "Usuário Apresentação",
+  "email": "apresentacao@locacao.com",
   "senha": "senha123"
 }
 
@@ -17,7 +17,7 @@ POST {{base}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "demo@locacao.com",
+  "email": "apresentacao@locacao.com",
   "senha": "senha123"
 }
 
