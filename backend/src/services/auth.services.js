@@ -17,15 +17,17 @@ export async function registrar({ nome, email, senha }) {
   });
 }
 
-
 export async function login({ email, senha }) {
   if (!email || !senha) throw new AppError("E-mail e senha são obrigatórios", 400);
+
   const usuario = await prisma.usuario.findUnique({ where: { email } });
   
   if (!usuario || !(await bcrypt.compare(senha, usuario.senha))) {
     throw new AppError("Credenciais inválidas", 401);
   }
+
   const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, { expiresIn: "8h" });
+
   return { token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email } };
 }
 
@@ -34,6 +36,8 @@ export async function perfil(id) {
     where: { id },
     select: { id: true, nome: true, email: true, criadoEm: true },
   });
+
   if (!usuario) throw new AppError("Usuário não encontrado", 404);
+  
   return usuario;
 }
