@@ -16,6 +16,10 @@ export async function registrar(usuarioId, { veiculoId, dataInicio, dataPrevista
   if (!veiculoId || !dataInicio || !dataPrevistaDevolucao) {
     throw new AppError("veiculoId, dataInicio e dataPrevistaDevolucao são obrigatórios", 400);
   }
+  const idVeiculo = Number(veiculoId);
+  if (!Number.isInteger(idVeiculo) || idVeiculo <= 0) {
+    throw new AppError("veiculoId deve ser um inteiro positivo", 400);
+  }
   const inicio = new Date(dataInicio);
   const fim = new Date(dataPrevistaDevolucao);
 
@@ -56,8 +60,12 @@ export function listarDoUsuario(usuarioId) {
 }
 
 export async function finalizar(usuarioId, id) {
+  const idLocacao = Number(id);
+  if (!Number.isInteger(idLocacao) || idLocacao <= 0) {
+    throw new AppError("id deve ser um inteiro positivo", 400);
+  }
   return prisma.$transaction(async (tx) => {
-    const locacao = await tx.locacao.findUnique({ where: { id: Number(id) } });
+    const locacao = await tx.locacao.findUnique({ where: { id: idLocacao } });
 
     if (!locacao) throw new AppError("Locação não encontrada", 404);
     
