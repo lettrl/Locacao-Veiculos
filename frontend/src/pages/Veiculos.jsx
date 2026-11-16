@@ -1,19 +1,26 @@
-import { useState, useEffect } from "react";
-import api from "../services/api";
+import { useCallback, useEffect, useState } from "react";
+import { api, mensagemDeErro } from "../services/api.js";
+import { formatarMoeda } from "../utils/formatadores.js";
+import { Mensagem } from "../components/Mensagem.jsx";
 
-export default function Veiculos() {
+export function Veiculos() {
   const [veiculos, setVeiculos] = useState([]);
   const [somenteDisponiveis, setSomenteDisponiveis] = useState(false);
   const [form, setForm] = useState({ marca: "", modelo: "", placa: "", ano: "", valorDiaria: "" });
-  const [sucesso, setSucesso] = useState("");
-  const [erro, setErro] = useState("");
+  const [mensagem, setMensagem] = useState(null);
 
-  async function carregar(disponiveis) {
-    const { data } = await api.get("/veiculos", { params: disponiveis ? { disponiveis: true } : {} });
-    setVeiculos(data);
-  }
+  const carregar = useCallback(async () => {
+    try {
+      const { data } = await api.get("/veiculos", {
+        params: somenteDisponiveis ? { disponiveis: true } : {},
+      });
+      setVeiculos(data);
+    } catch (erro) {
+      setMensagem({ tipo: "erro", texto: mensagemDeErro(erro) });
+    }
+  }, [somenteDisponiveis]);
 
-  useEffect(() => { carregar(somenteDisponiveis); }, [somenteDisponiveis]);
+  useEffect(() => { carregar(); }, [carregar]);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -21,8 +28,7 @@ export default function Veiculos() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setSucesso("");
-    setErro("");
+    setMensagem(null);
     try {
       await api.post("/veiculos", {
         ...form,
@@ -30,30 +36,28 @@ export default function Veiculos() {
         valorDiaria: Number(form.valorDiaria),
       });
       setForm({ marca: "", modelo: "", placa: "", ano: "", valorDiaria: "" });
-      setSucesso("Veículo cadastrado com sucesso!");
-      await carregar(somenteDisponiveis);
-    } catch (err) {
-      setErro(err.response?.data?.message ?? "Erro ao cadastrar veículo");
+      setMensagem({ tipo: "sucesso", texto: "Veículo cadastrado com sucesso!" });
+      await carregar();
+    } catch (erro) {
+      setMensagem({ tipo: "erro", texto: mensagemDeErro(erro) });
     }
   }
 
   return (
-    <div>
-      <h2>Veículos</h2>
+    <section className="pagina">
+      <h1>Veículos</h1>
+      <Mensagem mensagem={mensagem} />
 
-      <form onSubmit={handleSubmit}>
-        <input name="marca" placeholder="Marca" value={form.marca} onChange={handleChange} required />
-        <input name="modelo" placeholder="Modelo" value={form.modelo} onChange={handleChange} required />
-        <input name="placa" placeholder="Placa" value={form.placa} onChange={handleChange} required />
-        <input name="ano" placeholder="Ano" type="number" value={form.ano} onChange={handleChange} required />
-        <input name="valorDiaria" placeholder="Valor da diária" type="number" step="0.01" value={form.valorDiaria} onChange={handleChange} required />
-        <button type="submit">Cadastrar</button>
+      <form className="formulario" onSubmit={handleSubmit}>
+        <input className="campo" name="marca" placeholder="Marca" value={form.marca} onChange={handleChange} required />
+        <input className="campo" name="modelo" placeholder="Modelo" value={form.modelo} onChange={handleChange} required />
+        <input className="campo" name="placa" placeholder="Placa" value={form.placa} onChange={handleChange} required />
+        <input className="campo" name="ano" placeholder="Ano" type="number" value={form.ano} onChange={handleChange} required />
+        <input className="campo" name="valorDiaria" placeholder="Valor da diária" type="number" step="0.01" value={form.valorDiaria} onChange={handleChange} required />
+        <button className="botao-primario" type="submit">Cadastrar</button>
       </form>
 
-      {sucesso && <p style={{ color: "green" }}>{sucesso}</p>}
-      {erro && <p style={{ color: "red" }}>{erro}</p>}
-
-      <label>
+      <label className="filtro">
         <input
           type="checkbox"
           checked={somenteDisponiveis}
@@ -62,7 +66,7 @@ export default function Veiculos() {
         {" "}Só disponíveis
       </label>
 
-      <table>
+      <table className="tabela">
         <thead>
           <tr>
             <th>Marca</th>
@@ -74,18 +78,24 @@ export default function Veiculos() {
           </tr>
         </thead>
         <tbody>
-          {veiculos.map((v) => (
-            <tr key={v.id}>
-              <td>{v.marca}</td>
-              <td>{v.modelo}</td>
-              <td>{v.placa}</td>
-              <td>{v.ano}</td>
-              <td>R$ {Number(v.valorDiaria).toFixed(2)}</td>
-              <td>{v.disponivel ? "Sim" : "Não"}</td>
+          {veiculos.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="vazio">Nenhum veículo encontrado.</td>
             </tr>
-          ))}
+          ) : (
+            veiculos.map((v) => (
+              <tr key={v.id}>
+                <td>{v.marca}</td>
+                <td>{v.modelo}</td>
+                <td>{v.placa}</td>
+                <td>{v.ano}</td>
+                <td>{formatarMoeda(v.valorDiaria)}</td>
+                <td>{v.disponivel ? "Sim" : "Não"}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
-    </div>
+    </section>
   );
 }

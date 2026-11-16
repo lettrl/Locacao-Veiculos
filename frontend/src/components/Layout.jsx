@@ -11,6 +11,7 @@ export function Layout() {
       <header className="topo">
         <span className="marca">Locadora</span>
         <nav className="navegacao">
+          <NavLink to="/veiculos">Veículos</NavLink>
           <NavLink to="/locacoes">Locações</NavLink>
         </nav>
         <div className="usuario">
