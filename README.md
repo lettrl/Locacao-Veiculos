@@ -38,6 +38,7 @@ cd Locacao-Veiculos
 ```bash
 cd backend
 npm install
+npx prisma generate
 ```
 
 Copie `.env.example` para `.env` e preencha as variáveis:
